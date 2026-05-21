@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require("./User.js");
+const jwt = require('jsonwebtoken');
 
 // POST route (e.g., /api/users/register)
 router.post("/api/users/register", async (req, res) => {
@@ -20,6 +21,9 @@ router.post("/api/users/register", async (req, res) => {
         // Save to DB (triggers the pre-save hook)
         await newUser.save();
 
+    // Convert to object and remove password before sending back
+    const userResponse = newUser.toObject();
+    delete userResponse.password;
 
         res.status(201).json(userResponse);
     } catch (error) {
@@ -50,6 +54,9 @@ router.post('/api/users/login', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
+
+         const userResponse = user.toObject();
+    delete userResponse.password;
 
 
         res.json({ token, user: userResponse });
